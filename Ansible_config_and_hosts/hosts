@@ -1,7 +1,7 @@
 # This is the ansible 'hosts' file.
 
 [raspberry_pi]
-192.168.178.49
+111.222.333.444
 
 [raspberry_pi:vars]
 ansible_user = pi
