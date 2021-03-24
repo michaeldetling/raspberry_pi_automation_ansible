@@ -1,0 +1,7 @@
+# %groupname ALL=(ALL) NOPASSWD: ALL
+
+
+# duplicate template and rename placeholder "groupname" and remove "#"
+# rename the txt file 
+# add name of txt file to task create_strict_primary_groups -> name_of_permission
+# txt file will be implemented on host devices by running the corresponding task 

@@ -1,0 +1,19 @@
+# This is the ansible 'hosts' file.
+
+[raspberry_pi]
+192.168.178.49
+
+[raspberry_pi:vars]
+ansible_user = pi
+
+
+
+
+# For managing a specific group of raspberry_pi (for example for setting up some new Raspberry Pi while the others should continue to work)
+# Do not forget to change the host name in the playbooks set_up_can.yml, set_up_user.yml an set_up_raspberry_pi.yml so that the scripts are running on the right host
+
+#[new_raspberry_pi]
+# type in ip_adress
+
+#[new_raspberry_pi:vars]
+#ansible_user = pi

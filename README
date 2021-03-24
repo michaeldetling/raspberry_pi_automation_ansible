@@ -1,0 +1,333 @@
+TUTORIAL FOR THE PROJECT PI_AUTOMATION_ANSIBLE
+-------------------------------------------------------------------------------------------
+INFO:
+
+This project is a linux-based remote control for Raspberry Pi. It works with Ansible and uses the structure of playbooks and roles to fullfill different tasks on a Raspberry Pi.
+The main idea behind this project is to automate different tasks so that a Raspberry Pi can use CAN-ISOTP to communicate with automotive control units. 
+Through the use of Ansible all required work steps are automated and can be started by running specific commands in the Linux terminal. 
+This saves a lot of time and ensures that every Raspberry Pi is configuerd the same way.  
+As a technical basis this project once used the developments from Oliver Hartkopps CAN-ISOTP repository on Github (https://github.com/hartkopp/can-isotp). 
+But now can-isotp is by default in Linux.
+
+CAN-ISOTP:
+ISO 15765-2, or ISO-TP (Transport Layer), is an international standard for sending data packets over a CAN-Bus. 
+The protocol allows for the transport of messages that exceed the eight byte maximum payload of CAN frames.
+In the OSI Model, ISO-TP covers the layer 3 (network layer) and 4 (transport layer).
+
+
+The implemented Ansible playbooks can be divided into three different task areas:
+
+1. User Management 
+	- create or delete user on Raspberry Pi
+	- set up ssh connection between user and Raspberry Pi so that remote access is possible 
+	- update ssh connection of a user by inserting new key 
+	- group user into different secondary groups 
+	- distribute or withdraw sudo rights on the Raspberry Pi
+	- display all existing user and all existing groups 
+
+2. Set Up Raspberry Pi
+	- update and upgrade Raspberry Pi
+	- create or remove primary group with sudo rights by implementing or deleting permission on the Raspberry Pi in the correct directory 
+	- create or remove primary group without sudo rights 
+	- change default password of user pi
+	- set up Raspberry Pi for PICAN-DUO hardware extension 
+
+3. Set Up can
+	- install can-utils 
+	- install Raspberry Pi kernel headers
+	- set up can connection 
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+REQUIRED HARDWARE:
+
+	- Raspberry Pi 4
+	- PICAN2-DUO CAN-BUS Board for Raspberry Pi
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+HOW TO START AND SET UP THE PROJECT ENVIRONMENT
+
+1. Install Ansible on the administration comupter (Ubuntu) and set up the project Pi_Automation_with_Ansible
+
+	$ sudo apt-add-repository -y ppa:ansible/ansible
+	$ sudo apt-get update
+	$ sudo apt-get install -y ansible
+	
+	- By default the Ansible directory will be created in the /etc directory 
+	- Download the project and store it on the administration computer 
+	- All files and directories under /pi_automation_ansible/ansible_config_and_host should be copied and paced in the directory /etc/ansible 
+	- the default files and directories in /etc/ansible can be overwritten or deleted 
+	
+	- your directory /etc/ansible should now look like this 
+	-> /etc/ansible$ ls
+           ansible.cfg  hosts  hosts_orig  sudo_permission
+
+
+	- Set up the Raspberry Pi with Raspian and connect it to the internet 
+	- Determine the ip-address of the Raspberry Pi and enter it in the host file 
+	
+	- open host-file in /etc/ansible
+	- every ip-address which is listed in the host file will be recognized by ansible
+	- ip-adresses are grouped in groups which name should be enterd in the square brackets
+
+	- Example 1:
+		[placeholder]
+		ip-address1
+		ip-address2
+		.
+		.
+		.
+		
+	- Example 2 (specific):
+	
+		[raspberry_pi]
+		111.222.333.444
+		555.666.777.888
+		.
+		.
+		.
+		
+	- Ansible needs a default ssh user which can be used to connect on the Raspberry Pi
+	- for this the default user pi on the Raspberry Pi will be used because it is the only existing user on the Raspberry Pi so far
+	- therefore the group variable ansible_user = pi should be added to the host file
+	
+	-> [placeholder:vars]  (placeholder should be replaced with the host name chosen under 1.2)
+	   ansible_user = pi
+
+
+2. Set up the ssh conncetion between the administration computer and the Raspberry Pi
+
+	- Create your ssh key-pair:
+	-> $ cd /home/usr/.ssh         
+	   ~/.ssh$ ssh-keygen -t rsa -b 4096
+	
+	- the keys id_rsa und id_rsa.pub are stored in /home/usr/.ssh 
+	- id_rsa stays on the administration computer
+	- implement id_rsa.pub on the Raspberry Pi
+	- rename id_rsa.pub in authorized_keys  
+	- copy /.ssh/authorized_keys on the Raspberry Pi 
+	
+	$ scp -r .ssh pi@111.222.333.444:/home/pi
+	pi@111.222.333.444's password: 
+	authorized_keys                                 100%  752   116.2KB/s   00:00     
+	
+	
+	- on the Raspberry Pi it should look like this:
+	
+	pi@raspberrypi:~ $ cd /home/pi/.ssh
+	pi@raspberrypi:~/.ssh $ ls
+	authorized_keys  
+
+	- ansible ping to test the ssh connection
+		~$ ansible raspberry_pi -m ping
+	
+	- answer if ssh connection works properly:
+		111.222.333.444 | SUCCESS => {
+   		 	"ansible_facts": {
+        			"discovered_interpreter_python": "/usr/bin/python"
+   			 },
+   			 "changed": false,
+  			  "ping": "pong"
+			}
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+PROJECT STRUCTURE
+
+
+UI-FILES							PLAYBOOKS 							ROLES					ROLE SPECIFIC FOLDERS			YAML FILE WITH FUNCTIONALITIES
+																								FILES/HANDLERS/TASKS/VARS
+
+UI_USER.YML-------------------------SET_UP_USER.YML---------------------USER--------------------------TASKS---------------------------------MAIN.YML
+
+
+UI_RASPBERRY_PI.YML-----------------SET_UP_RASPBERRY_PI.YML-------------RASPBERRY_PI------------------TASKS---------------------------------MAIN.YML
+
+
+UI_CAN.YML--------------------------SET_UP_CAN.YML----------------------CAN---------------------------TASKS---------------------------------MAIN.YML
+
+
+
+UI-FILES: 
+	- really simple user interface where the user/administrator can type in specific information which will be processed in the playbooks
+	- the files are included into the playbooks so that the playbooks can read from them
+	- Example: name of new user, name of user to delete, ssh public key, name of group to create, bitrate of can
+
+PLAYBOOKS: 
+	- the three playbooks describe the section they are responsible for but they do not contain the logic 
+	- the name of the host on which the playbooks should work must be listed here (hosts:....)
+	- UI_files must be listed here
+	- the playbooks call up specefic roles 
+
+ROLES:
+	- every role has its own directory in which role specific information can be implemented
+
+
+YAML FILE WITH FUNCTIONALITIES:
+	- the logic for every role is implemented in the directory tasks in the yaml file called main.yml
+	- this file contains the different tasks which a playbook can start 
+	- every task is tagged with a specific name (in Ansible called "tags")
+	- a tag is kind of a keyword which results in the execution of single task or multiple tasks which are related 
+	- this has the advantage that you ensure that only the needed part of the main.yml file is executed and not everything which could lead into a big chaos 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TAG LEGEND:
+
+- ansible-playbook set_up_user.yml --tags add_multiple_user:
+		- adds multiple user with: username, primary group, secondary group, UID, and ssh public key
+		- type in UI_user.yml -> add_multiple_user
+
+- ansible-playbook set_up_user.yml --tags add_single_user:
+		- adds single user with: username, primary group, secondary group, UID, and ssh public key
+		- type in UI_user.yml -> add_single_user
+
+- ansible-playbook set_up_user.yml --tags create_secondary_group:
+		- creates secondary group 
+		- type in UI_user.yml -> create_secondary_group
+	
+- ansible-playbook set_up_user.yml --tags edit_secondary_group_of_existing_user:
+		- edits secondary group of a user 
+		- type in Ui_user.yml -> edit_secondary_group_of_existing_user
+
+- ansible-playbook set_up_user.yml --tags edit_sudo_rights_of_existing_user:
+		- adds or revokes sudo rights from user by editing his primary group 
+		- type in UI_user.yml -> edit_sudo_rights_of_existing_user
+
+- ansible-playbook set_up_user.yml --tags extract_existing_groups:
+		- displays the file /etc/groups from Raspberry Pi
+
+- ansible-playbook set_up_user.yml --tags extract_existing_user:
+		- displays the file /etc/passwd from Raspberry Pi
+
+- ansible-playbook set_up_user.yml --tags remove_secondary_group: 
+		- removes secondary group
+		- type in UI_user.yml -> remove_secondary_group
+
+- ansible-playbook set_up_user.yml --tags remove_user:
+		- removes existing user and all his files 
+		- type in UI_user.yml -> remove_existing_user
+
+- ansible-playbook set_up_user.yml --tags update_public_key_of_existing_user: 
+		- overwrites the existing ssh key with a new one 
+		- type in UI_user.yml -> update_public_key_of_existing_user
+
+
+
+- ansible-playbook set_up_raspberry_pi.yml --tags change_pw_of_pi: 
+		- change of default password for the user 'pi'
+		- the new password has to be typed in roles/raspberry_pi/tasks/main.yml in the task 'change default password of user pi '
+
+- ansible-playbook set_up_raspberry_pi.yml --tags create_primary_group_without_sudo:
+		- creates a primary group without sudo rights 
+		- select name in UI_raspberry_pi.yml
+
+- ansible-playbook set_up_raspberry_pi.yml --tags create_sudo_primary_group: 
+		- creates a primary group with sudo rights by implementing a sudo permission for the groupname on the Raspberry Pi under /etc/sudoers.d/
+		- make sure to create the right sudo permission file which has to be placed in /etc/ansible/sudo_permission/ before running the play (watch template_sudo_permission in ansible_config_and_host/sudo_permission)
+		- references to this file has to be given in UI_raspberry_pi.yml
+
+- ansible-playbook set_up_raspberry_pi.yml --tags pican_duo_overlay:
+		- edits the file /boot/config.txt on the Raspberry Pi by adding the correct lines for the PICAN-DUO extension
+
+- ansible-playbook set_up_raspberry_pi.yml --tags debug_pican_duo_overlay:
+		- displays the config.txt file from the Raspberry Pi for checking if the lines were added correctly
+
+- ansible-playbook set_up_raspberry_pi.yml --tags remove_primary_group_without_sudo:
+		- deletes the primary group which has to be listed in UI_raspberry_pi.yml
+
+- ansible-playbook set_up_raspberry_pi.yml --tags remove_sudo_primary_group:
+		- deletes the primary group and the corresponding sudo permission on the Raspberry Pi under /etc/sudoers.d/
+		- both have to be listed in UI_raspberry_pi.yml
+
+- ansible-playbook set_up_raspberry_pi.yml --tags set_up_raspberry_pi:
+		- command for running all tasks of the playbook set_up_raspberry_pi.yml at once with default primary groups 'sudoer' and 'nosuoder'
+
+- ansible-playbook set_up_raspberry_pi.yml --tags update_upgrade_raspberry_pi:
+		- updates and upgrades the Raspberry Pi
+		- update intervall can be defined 
+
+
+
+- ansible-playbook set_up_can.yml --tags can_isotp:
+		- updates and upgrades the Raspberry Pi
+		- ensures that can-utils are installed and up to date 
+		- ensures that  Raspberry Pi kernel headers are installed and up to date 
+		- displays result of command 'lsmod | grep can' on Raspberry Pi in the terminal
+		- sets up can1 and can0 with bitrate from UI_can.yml
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+EXAMPLE OF RUNNING A PLAY:
+
+	- enter linux terminal
+	- so that ansible can recognize the playbooks you have to navigate into the project folder "playbooks" and run them out of this directory all the time!!
+	-> cd /pi_automation_ansible/playbooks 
+
+	- command to run a playbook without tags: ansible-playbook example.yml (but not really needed in this project)
+	- command to run a playbook with a tag: ansible-playbook example.yml --tags exampletag
+	- command to show all tags of a playbook: ansible-playbook example.yml --list-tags 
+	- another helpful command: ansible -m ping all (ping all hosts to see if they are reachable)
+
+	- Specific example:
+
+		- ansible-playbook set_up_can.yml --list-tags (show all tags of the play, not necessarily needed but helpful to get a overview)
+		-> this should now appear: 
+										playbook: set_up_can.yml
+
+  										play #1 (raspberry_pi): SET UP CAN	TAGS: []
+  									    TASK TAGS: [can_isotp]
+		
+		- set up the can-isotp on the Raspberry Pi 
+		-> ansible-playbok set_up_can.yml --tags can_isotp
+
+
+		-> Play will run and following should appear in the linux terminal
+
+
+		PLAY [SET UP CAN] **************************************************************
+
+		TASK [Gathering Facts] *********************************************************
+		[WARNING]: Platform linux on host 111.222.333.444 is using the discovered Python
+		interpreter at /usr/bin/python, but future installation of another Python
+		interpreter could change this. See https://docs.ansible.com/ansible/2.9/referen
+		ce_appendices/interpreter_discovery.html for more information.
+		ok: [111.222.333.444]
+
+		TASK [can : update raspberry_pi software "apt-get update" and "apt-get upgrade"] ***
+		ok: [111.222.333.444]
+
+		TASK [can : ensure can utils are installed and up to date] *********************
+		ok: [111.222.333.444]
+
+		TASK [can : install kernel headers for raspberry_pi] ***************************
+		ok: [111.222.333.444]
+
+		TASK [can : store results] *****************************************************
+		changed: [111.222.333.444]
+
+		TASK [can : output results] ****************************************************
+		ok: [111.222.333.444] => {
+    			"shell_result.stdout_lines": [
+        		"can_isotp              24576  0",
+        		"can                    28672  1 can_isotp",
+        		"can_dev                28672  1 mcp251x"
+    		]
+		}
+
+		TASK [can : set can1 bitrate] **************************************************
+		changed: [111.222.333.444]
+
+		TASK [can : set up can1] *******************************************************
+		changed: [111.222.333.444]
+
+		TASK [can : set can0 bitrate] **************************************************
+		changed: [111.222.333.444]
+
+		TASK [can : set up can0] *******************************************************
+		changed: [111.222.333.444]
+
+		PLAY RECAP *********************************************************************
+		111.222.333.444             : ok=14   changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+
+
+
+
+

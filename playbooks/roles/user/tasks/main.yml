@@ -1,0 +1,214 @@
+---
+
+###BEGIN OF SINGLE USER TASKS###
+- name: add user to host machines 
+  become: true 
+  user:
+    name: "{{item.single_username}}" 
+    group: "{{item.single_usergroup_primary}}"
+    groups: "{{item.single_usergroup_secondary}}"
+    uid: "{{item.single_useruid}}"
+    shell:  /bin/bash
+    create_home: yes
+    state: present
+  with_items: 
+    - "{{add_single_user}}"
+  tags: 
+    - add_single_user
+
+- name: create directory home/user/.ssh of single user
+  become: true 
+  file:
+    path: /home/{{item.single_username}}/.ssh
+    state: directory
+  with_items:
+    - "{{add_single_user}}"
+  tags: 
+    - add_single_user
+
+- name: create empty file "authorized_keys" in home/user/.ssh of single user
+  become: true
+  file:
+    path: /home/{{item.single_username}}/.ssh/authorized_keys
+    state: touch
+  with_items:
+    - "{{add_single_user}}"
+  tags: 
+    - add_single_user
+  
+- name: implement ssh key id_rsa.pub in authorized_keys of single user
+  become: true
+  authorized_key:
+    user: "{{item.single_username}}"
+    key: "{{item.single_public_key}}"
+    path: /home/{{item.single_username}}/.ssh/authorized_keys
+  with_items:
+    - "{{add_single_user}}"
+  tags: 
+    - add_single_user
+###END OF SINGLE USER TASKS###  
+
+
+###BEGIN OF MULTIPLE USER TASKS###
+- name: add user to host machines 
+  become: true 
+  user:
+    name: "{{item.multiple_username}}" 
+    group: "{{item.multiple_usergroup_primary}}"
+    groups: "{{item.multiple_usergroup_secondary}}"
+    uid: "{{item.multiple_useruid}}"
+    shell:  /bin/bash
+    create_home: yes
+    state: present
+  with_items: 
+    - "{{add_multiple_user}}"
+  tags: 
+    - add_multiple_user
+
+- name: create directory home/user/.ssh 
+  become: true 
+  file:
+    path: /home/{{item.multiple_username}}/.ssh
+    state: directory
+  with_items:
+    - "{{add_multiple_user}}"
+  tags: 
+    - add_multiple_user
+
+- name: create empty file "authorized_keys" in home/user/.ssh
+  become: true
+  file:
+    path: /home/{{item.multiple_username}}/.ssh/authorized_keys
+    state: touch
+  with_items:
+    - "{{add_multiple_user}}"
+  tags: 
+    - add_multiple_user
+  
+- name: implement ssh key id_rsa.pub in authorized_keys
+  become: true
+  authorized_key:
+    user: "{{item.multiple_username}}"
+    key: "{{item.multiple_public_key}}"
+    path: /home/{{item.multiple_username}}/.ssh/authorized_keys
+  with_items:
+    - "{{add_multiple_user}}"
+  tags: 
+    - add_multiple_user
+###END OF MULTIPLE USER TASKS####
+
+
+- name: remove user and all user files from host machines
+  become: true 
+  user:
+    name: "{{item.username}}"
+    state: absent 
+    remove: yes
+    force: yes
+  with_items:
+    - "{{remove_existing_user}}"
+  tags: 
+    - remove_user
+
+
+- name: edit sudo rights of existing user
+  become: true
+  user: 
+    name: "{{item.username}}"
+    group: "{{item.usergroup_primary}}" 
+  with_items: 
+    - "{{edit_sudo_rights_of_existing_user}}"
+  tags: 
+    - edit_sudo_rights_of_existing_user
+
+
+- name: remove old public_key from home/user/.ssh/authorized_keys
+  become: true 
+  lineinfile:
+    path: /home/{{item.username}}/.ssh/authorized_keys
+    regexp: '^ssh-rsa'
+    state: absent
+  with_items:
+    - "{{update_public_key_of_existing_user}}"
+  tags: 
+    - update_public_key_of_existing_user
+
+
+- name: implement new_public_key in home/user/.ssh/authorized_keys
+  become: true
+  authorized_key:
+    user: "{{item.username}}"
+    key: "{{item.new_public_key}}"
+    path: /home/{{item.username}}/.ssh/authorized_keys
+  with_items:
+    - "{{update_public_key_of_existing_user}}"
+  tags: 
+    - update_public_key_of_existing_user
+
+
+- name: edit_secondary_group_of_existing_user
+  become: true 
+  user:
+    name: "{{item.username}}"
+    groups: "{{item.secondarygroups}}"
+  with_items:
+    "{{edit_secondary_group_of_existing_user}}"
+  tags: 
+    - edit_secondary_group_of_existing_user
+
+
+- name: create secondary group on host machines
+  become: true 
+  group:
+    name: "{{item.groupname_secondary}}"
+    gid: "{{item.groupGID_secondary}}"
+    state: present 
+  with_items:
+    "{{create_secondary_group}}"
+  tags: 
+    - create_secondary_group
+
+
+- name: remove secondary group from host machines
+  become: true 
+  group:
+    name: "{{item.groupname_secondary}}"
+    state: absent 
+  with_items:
+    "{{remove_secondary_group}}"
+  tags: 
+    - remove_secondary_group
+    
+    
+- name: store existing user from host devices into variable 
+  shell: cat passwd
+  become: true 
+  register: existing_user_var
+  args: 
+    chdir: /etc 
+  tags: 
+    - extract_existing_user
+
+  
+- name: output existing user from host devices 
+  debug:
+    var: existing_user_var
+  tags:
+    - extract_existing_user
+
+
+- name: store existing groups from host devices into variable 
+  shell: cat group
+  become: true 
+  register: existing_groups_var
+  args: 
+    chdir: /etc 
+  tags: 
+    - extract_existing_groups 
+
+
+- name: output existing groups from host devices 
+  debug: 
+    var: existing_groups_var
+  tags: 
+    - extract_existing_groups 

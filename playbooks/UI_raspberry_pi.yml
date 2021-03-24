@@ -1,0 +1,30 @@
+---
+# To run all in one with default settings and without making changes use tag: set_up_raspberry_pi
+# default primary groups: sudoer and nosudoer
+# default permission for primary group with sudo rights: 010_sudoer-nopasswd 
+
+var_update_intervall: 1800  #in seconds
+
+# default name of permission which will be implemented on host devices in /etc/sudoers.d/: 010_sudoer-nopasswd
+# if you want to change the name of the primary group with sudo rights you also have to make changes on the main computer in /etc/ansible/sudo_permission by creating a new permission with the new groupname (use template)
+# if you want to create multiple primary groups with sudo rights you have to creat a permission for each one (use template)
+# the permission file will be implemented and  primary group with sudo rights will be created by running the tag create_sudo_primary_group
+# the permission  file wille be deleted and primary group will be removed by running the tag remove_sudo_primary_group
+# you have to remove all user from group to be able to remove it 
+primary_group_with_sudo_rights:
+
+  - name_primary_group_sudo: sudoer
+    primary_group_permission_file: 010_sudoer-nopasswd 
+    gid_primary_group_sudo: 2000 
+
+
+# primary group without sudo rights will be created by running the tag create_primary_group_without_sudo
+# primary group will be removed by running the tag remove_primary_group_without_sudo
+# you have to remove all user from group to be able to remove it 
+primary_group_without_sudo_rights:
+
+  - name_primary_group_without_sudo: nosudoer
+    gid_primary_group_without_sudo: 2001
+
+
+

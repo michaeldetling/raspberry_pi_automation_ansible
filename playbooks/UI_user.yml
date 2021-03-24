@@ -1,0 +1,68 @@
+---
+add_single_user: 
+# Insert single user at once
+# Corresponding tag: add_single_user
+# after inserting a single user, make sure you update your general list of user in UI_user.yml -> user_to_add -> multiple user for being up to date
+  - single_username: michael
+    single_usergroup_primary: sudoer
+    single_usergroup_secondary: 
+    single_useruid: 1119
+    single_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJSqYKTzTRFV6F39lB38Ru/2TsqZ07Jnh+Oup4SAgjjCFAC++E70eiL6TrkhpAnq2KEVG9pvgLTzAg6TSvDCJQfP/0HKWLW2CLlgMuJg90iOD2qgi1AV+wZcyANWhogPH9Px8/7GTDdOwLsN4E0u/rA/XF/WGAkDTaOAMHGy9J5+w0WQmB3FhIRuVVwXkuFeQoJcnSUARU0NeUFP5vZRtCHER3NSr/+xVw2lK5pWoHovoVrZEdEmw8yU6nyVnZiYth9RUM5ipdWfo4rCftUujVip3emml4lTHzt6+HdJJ+JegpnMoMOvZUscY47DPFRPfPwmkSj/aXlsvcGOTNl2jUoyg86de+3YyvqEgvXFP9d+DV9nMTqaHHRuDBzCN/P8RBogBOiYhHVydaPc3GlMA+pgL0aSTT9fqtLTWiID8IbxiqS45vmkEpDmGkxqaNTswPP5DxleDbP9eTVZfS75wcZI5FZz+23w0Vn+QOM7LAnDoRREqb6Oy6et/JbyY06wPUaPhs+O8G0VTt9ZZGsyf+HatI/QEAzmKeTF7fOoaeTybxYW4PUD5dxm9hoTh4JeBCFNr80p+1cAvjPq+i4JHORlwSABe/75ojM8RuqADTSZNEt9xIHsYOmdwQ5BRA/dAs6NP3ykE/15PELVtnOZv71Fesuq3p9+FUOI+OVekn1Q== michael@michael-VirtualBox"
+
+add_multiple_user:
+# BEGIN MULTIPLE USER
+# Insert multiple user at once
+# Corresponding tag: add_multiple_user
+  - multiple_username: jonas
+    multiple_usergroup_primary: sudoer
+    multiple_usergroup_secondary: ''
+    multiple_useruid: 1112
+    multiple_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJSqYKTzTRFV6F39lB38Ru/2TsqZ07Jnh+Oup4SAgjjCFAC++E70eiL6TrkhpAnq2KEVG9pvgLTzAg6TSvDCJQfP/0HKWLW2CLlgMuJg90iOD2qgi1AV+wZcyANWhogPH9Px8/7GTDdOwLsN4E0u/rA/XF/WGAkDTaOAMHGy9J5+w0WQmB3FhIRuVVwXkuFeQoJcnSUARU0NeUFP5vZRtCHER3NSr/+xVw2lK5pWoHovoVrZEdEmw8yU6nyVnZiYth9RUM5ipdWfo4rCftUujVip3emml4lTHzt6+HdJJ+JegpnMoMOvZUscY47DPFRPfPwmkSj/aXlsvcGOTNl2jUoyg86de+3YyvqEgvXFP9d+DV9nMTqaHHRuDBzCN/P8RBogBOiYhHVydaPc3GlMA+pgL0aSTT9fqtLTWiID8IbxiqS45vmkEpDmGkxqaNTswPP5DxleDbP9eTVZfS75wcZI5FZz+23w0Vn+QOM7LAnDoRREqb6Oy6et/JbyY06wPUaPhs+O8G0VTt9ZZGsyf+HatI/QEAzmKeTF7fOoaeTybxYW4PUD5dxm9hoTh4JeBCFNr80p+1cAvjPq+i4JHORlwSABe/75ojM8RuqADTSZNEt9xIHsYOmdwQ5BRA/dAs6NP3ykE/15PELVtnOZv71Fesuq3p9+FUOI+OVekn1Q== michael@michael-VirtualBox"
+  
+  - multiple_username: martin
+    multiple_usergroup_primary: sudoer
+    multiple_usergroup_secondary: ''
+    multiple_useruid: 1113
+    multiple_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJSqYKTzTRFV6F39lB38Ru/2TsqZ07Jnh+Oup4SAgjjCFAC++E70eiL6TrkhpAnq2KEVG9pvgLTzAg6TSvDCJQfP/0HKWLW2CLlgMuJg90iOD2qgi1AV+wZcyANWhogPH9Px8/7GTDdOwLsN4E0u/rA/XF/WGAkDTaOAMHGy9J5+w0WQmB3FhIRuVVwXkuFeQoJcnSUARU0NeUFP5vZRtCHER3NSr/+xVw2lK5pWoHovoVrZEdEmw8yU6nyVnZiYth9RUM5ipdWfo4rCftUujVip3emml4lTHzt6+HdJJ+JegpnMoMOvZUscY47DPFRPfPwmkSj/aXlsvcGOTNl2jUoyg86de+3YyvqEgvXFP9d+DV9nMTqaHHRuDBzCN/P8RBogBOiYhHVydaPc3GlMA+pgL0aSTT9fqtLTWiID8IbxiqS45vmkEpDmGkxqaNTswPP5DxleDbP9eTVZfS75wcZI5FZz+23w0Vn+QOM7LAnDoRREqb6Oy6et/JbyY06wPUaPhs+O8G0VTt9ZZGsyf+HatI/QEAzmKeTF7fOoaeTybxYW4PUD5dxm9hoTh4JeBCFNr80p+1cAvjPq+i4JHORlwSABe/75ojM8RuqADTSZNEt9xIHsYOmdwQ5BRA/dAs6NP3ykE/15PELVtnOZv71Fesuq3p9+FUOI+OVekn1Q== michael@michael-VirtualBox"
+# END MULTIPLE USER
+
+
+remove_existing_user:
+# Corresponding tag: remove_user
+  - username:  
+  - username:  
+
+edit_sudo_rights_of_existing_user:
+# Corresponding tag: edit_sudo_rights_of_existing_user
+# for usergroup_primary only sudoer or nosudoer is possible 
+  - username: 
+    usergroup_primary: 
+    
+update_public_key_of_existing_user:
+# Corresponding tag: update_public_key_of_existing_user
+# Old public_key will be removed and replaced by new_public_key on the host machines
+# make sure you replace the old public_key with the new public_key in your general list of user in UI_user.yml -> user_to_add -> multiple user
+  - username: 
+    new_public_key: 
+
+edit_secondary_group_of_existing_user:
+# Corresponding tag: edit_secondary_group_of_existing_user
+# Secondary groups must exist before user can be added (if not Ansible will throw error message)
+# user can be member of more then one secondary group
+# remove user from all secondary groups he is member of -> use: groups: ''  (empty quotation marks)
+  - username: 
+    secondarygroups: 
+
+create_secondary_group:
+# Corresponding tag: create_secondary_group
+# only secondary groups are createable, primary are strict
+  - groupname_secondary: 
+    groupGID_secondary: 
+  
+remove_secondary_group:
+# Corresponding tag: remove_secondary_group
+# only secondary groups are removable, primary are strict
+# only empty secondary groups are removable -> remove all user from the secondary group before deleting it
+  - groupname_secondary: 
+  - groupname_secondary: 
+  

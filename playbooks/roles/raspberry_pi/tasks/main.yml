@@ -1,0 +1,161 @@
+---
+- name: update raspberry_pi software "apt-get update" and "apt-get upgrade"
+  become: true
+  apt:
+    update_cache: yes
+    cache_valid_time: "{{var_update_intervall}}"  
+    upgrade: full
+  notify: Reboot system
+  tags: 
+    - set_up_raspberry_pi
+    - update_upgrade_raspberry_pi
+  
+
+- name: change default password of user pi 
+  become: true
+  user:
+    name: pi
+    update_password: always
+    password: "{{ 'carsecurity123456' | password_hash('sha512') }}" 
+  notify: Reboot system
+  tags: 
+    - change_pw_of_pi
+    - set_up_raspberry_pi
+
+
+- name: implement sudo permission in /etc/sudoers.d/ on host machines
+  become: true 
+  copy:
+    src: /etc/ansible/sudo_permission/{{item.primary_group_permission_file}}
+    dest: /etc/sudoers.d
+  with_items:
+    "{{primary_group_with_sudo_rights}}"
+  tags: 
+    - create_sudo_primary_group
+    - set_up_raspberry_pi
+
+
+- name: create primary group with sudo rights on host machines
+  become: true
+  group:
+    name: "{{item.name_primary_group_sudo}}"
+    gid: "{{item.gid_primary_group_sudo}}"
+    state: present
+  with_items:
+    "{{primary_group_with_sudo_rights}}"
+  tags: 
+    - create_sudo_primary_group
+    - set_up_raspberry_pi
+
+
+- name: remove primary group with sudo rights from host machines
+  become: true
+  group:
+    name: "{{item.name_primary_group_sudo}}"
+    state: absent
+  with_items:
+    "{{primary_group_with_sudo_rights}}"
+  tags: 
+    - remove_sudo_primary_group
+
+  
+- name: delete corresponding sudo permission on host machines under /etc/sudoers.d
+  become: true 
+  file:
+    path: /etc/sudoers.d/{{item.primary_group_permission_file}}
+    state: absent
+  with_items:
+    "{{primary_group_with_sudo_rights}}"
+  tags:
+    - remove_sudo_primary_group
+
+
+- name: create primary group WITHOUT sudo rights on host machines
+  become: true
+  group:
+    name: "{{item.name_primary_group_without_sudo}}"
+    gid: "{{item.gid_primary_group_without_sudo}}"
+    state: present
+  with_items:
+    "{{primary_group_without_sudo_rights}}"
+  tags: 
+    - create_primary_group_without_sudo
+    - set_up_raspberry_pi
+
+
+- name: remove primary group WITHOUT sudo rights on host machines
+  become: true
+  group:
+    name: "{{item.name_primary_group_without_sudo}}"
+    state: absent
+  with_items:
+    "{{primary_group_without_sudo_rights}}"
+  tags: 
+    - remove_primary_group_without_sudo
+
+    
+# START PICAN-DUO TASKS
+- name: ensure PICAN-DUO overlay is installed
+  become: true
+  lineinfile:
+    path: /boot/config.txt
+    state: present
+    regexp: '^dtparam=spi=on'
+    line: 'dtparam=spi=on'
+  tags: 
+    - pican_duo_overlay
+    - set_up_raspberry_pi
+
+
+- name: ensure PICAN-DUO overlay is installed
+  become: true
+  lineinfile:
+    path: /boot/config.txt
+    state: present
+    regexp: '^dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25'
+    line: 'dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25'
+  tags: 
+    - pican_duo_overlay
+    - set_up_raspberry_pi
+
+    
+- name: ensure PICAN-DUO overlay is installed
+  become: true
+  lineinfile:
+    path: /boot/config.txt
+    state: present
+    regexp: '^dtoverlay=mcp2515-can1,oscillator=16000000,interrupt=24'
+    line: 'dtoverlay=mcp2515-can1,oscillator=16000000,interrupt=24'
+  tags: 
+    - pican_duo_overlay
+    - set_up_raspberry_pi
+
+    
+- name: ensure PICAN-DUO overlay is installed
+  become: true
+  lineinfile:
+    path: /boot/config.txt
+    state: present
+    regexp: '^dtoverlay=spi-bcm2835-overlay'
+    line: 'dtoverlay=spi-bcm2835-overlay'
+  notify: Reboot system
+  tags: 
+    - pican_duo_overlay
+    - set_up_raspberry_pi
+
+- name: ensure PICAN-DUO overlay is installed correctly -> store /boot/config.txt from raspberry pi 
+  shell: cat config.txt
+  become: true 
+  register: var_config 
+  args: 
+    chdir: /boot
+  tags: 
+    - debug_pican_duo_overlay 
+
+- name: ensure PICAN-DUO overlay is installed correctly -> output /boot/config.txt from raspberry pi
+  debug: 
+    var: var_config 
+  tags: 
+    - debug_pican_duo_overlay 
+
+# END PICAN-DUO TASKS

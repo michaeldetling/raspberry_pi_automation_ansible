@@ -1,0 +1,11 @@
+---
+
+# Bitrate of can1
+var_can1_bitrate: 500000
+
+
+# Bitrate of can0
+var_can0_bitrate: 500000
+
+# Raspberry Pi update intervall
+var_update_intervall: 1800  # in seconds

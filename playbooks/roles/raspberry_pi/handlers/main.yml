@@ -1,0 +1,7 @@
+---
+
+- name: Reboot system
+  become: true
+  reboot:
+    reboot_timeout: 60
+

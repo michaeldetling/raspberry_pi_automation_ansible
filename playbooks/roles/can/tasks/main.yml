@@ -1,0 +1,72 @@
+---
+
+- name: update raspberry_pi software "apt-get update" and "apt-get upgrade"
+  become: true
+  apt:
+    update_cache: yes
+    cache_valid_time: "{{var_update_intervall}}"  
+    upgrade: full  
+  tags: 
+    - can_isotp
+
+
+- name: ensure can utils are installed and up to date 
+  become: true 
+  apt: 
+    name: can-utils 
+    state: latest
+  tags: 
+    - can_isotp
+
+
+- name: install kernel headers for raspberry_pi
+  become: true
+  apt:
+    name: raspberrypi-kernel-headers
+    state: latest
+  tags: 
+    - can_isotp
+
+
+- name: store results 
+  shell: lsmod | grep can
+  become: true 
+  register: shell_result
+  tags: 
+    - can_isotp
+    
+
+- name: output results 
+  debug:
+    var: shell_result.stdout_lines
+  tags: 
+    - can_isotp
+
+
+- name: set can1 bitrate
+  shell: ip link set can1 type can bitrate "{{var_can1_bitrate}}" 
+  become: true 
+  tags:
+    - can_isotp
+
+
+- name: set up can1
+  shell: ip link set up can1
+  become: true 
+  tags:
+    - can_isotp
+
+
+- name: set can0 bitrate
+  shell: ip link set can0 type can bitrate "{{var_can0_bitrate}}" 
+  become: true 
+  tags:
+    - can_isotp
+
+
+- name: set up can0
+  shell: ip link set up can0
+  become: true 
+  tags:
+    - can_isotp
+
