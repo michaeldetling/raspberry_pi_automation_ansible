@@ -1,15 +1,5 @@
 ---
 
-- name: update raspberry_pi software "apt-get update" and "apt-get upgrade"
-  become: true
-  apt:
-    update_cache: yes
-    cache_valid_time: "{{var_update_intervall}}"  
-    upgrade: full  
-  tags: 
-    - can_isotp
-
-
 - name: ensure can utils are installed and up to date 
   become: true 
   apt: 
@@ -28,12 +18,53 @@
     - can_isotp
 
 
+# START OF INSTALLING CAN-ISOTP FROM HARTKOPP
+- name: checkout hartkopp can-isotp from github to /etc/can-isotp
+  become: true 
+  git:
+    repo: 'https://github.com/hartkopp/can-isotp.git'
+    dest: /etc/can-isotp
+    update: yes 
+    #version: possibility to checkout specific version
+  tags: 
+    - can_isotp_install
+
+
+- name: build kernel module in repositories root path
+  become: true
+  shell: make -C /lib/modules/$(uname -r)/build M=$(pwd) modules_install
+  args:
+    chdir: /etc/can-isotp
+  tags: 
+    - can_isotp_install
+
+
+- name: execute command in repositories root path -> depmod 
+  shell: depmod
+  become: true 
+  args:
+    chdir: /etc/can-isotp
+  tags:
+    - can_isotp_install
+
+
+- name: execute command in repositories root path -> modprobe can-isotp
+  shell: modprobe can-isotp
+  become: true 
+  args:
+    chdir: /etc/can-isotp
+  tags:
+    - can_isotp_install
+# END OF INSTALLING CAN-ISOTP FROM HARTKOPP
+
+
 - name: store results 
   shell: lsmod | grep can
   become: true 
   register: shell_result
   tags: 
     - can_isotp
+    - can_isotp_install
     
 
 - name: output results 
@@ -41,6 +72,7 @@
     var: shell_result.stdout_lines
   tags: 
     - can_isotp
+    - can_isotp_install
 
 
 - name: set can1 bitrate
@@ -48,6 +80,7 @@
   become: true 
   tags:
     - can_isotp
+    - set_up_can0_can1
 
 
 - name: set up can1
@@ -55,6 +88,7 @@
   become: true 
   tags:
     - can_isotp
+    - set_up_can0_can1
 
 
 - name: set can0 bitrate
@@ -62,6 +96,7 @@
   become: true 
   tags:
     - can_isotp
+    - set_up_can0_can1
 
 
 - name: set up can0
@@ -69,4 +104,5 @@
   become: true 
   tags:
     - can_isotp
+    - set_up_can0_can1
 
